@@ -1,0 +1,157 @@
+{
+    "type": "script",
+    "title": "Music token",
+    "description": "This music token is following CIP-60. Your music will be stored on Cardano forever using GCFS",
+    "exportAs": "Music_Token",
+    "return": {
+        "mode": "last"
+    },
+    "run": {
+        "dependencies": {
+            "type": "script",
+            "run": {
+                "address": {
+                    "type": "getCurrentAddress"
+                },
+                "addressInfo": {
+                    "type": "macro",
+                    "run": "{getAddressInfo(get('cache.dependencies.address'))}"
+                },
+                "assetName": {
+                    "type": "data",
+                    "value": "GameChangerNFT"
+                },
+                "quantity": {
+                    "type": "data",
+                    "value": "100"
+                },
+                "currentSlotNumber": {
+                    "type": "getCurrentSlot"
+                },
+                "deadlineSlotNumber": {
+                    "type": "macro",
+                    "run": "{addBigNum(get('cache.dependencies.currentSlotNumber'),'86400')}"
+                },
+                "mintingPolicy": {
+                    "type": "nativeScript",
+                    "script": {
+                        "all": {
+                            "issuer": {
+                                "pubKeyHashHex": "{get('cache.dependencies.addressInfo.paymentKeyHash')}"
+                            },
+                            "timeLock": {
+                                "slotNumEnd": "{get('cache.dependencies.deadlineSlotNumber')}"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "build": {
+            "type": "buildTx",
+            "name": "built-Music-mint-song",
+            "title": "Outcast build song mint",
+            "tx": {
+                "ttl": {
+                    "until": "{get('cache.dependencies.deadlineSlotNumber')}"
+                },
+                "mints": [
+                    {
+                        "policyId": "{get('cache.dependencies.mintingPolicy.scriptHashHex')}",
+                        "assets": [
+                            {
+                                "assetName": "{get('cache.dependencies.assetName')}",
+                                "quantity": "{get('cache.dependencies.quantity')}"
+                            }
+                        ]
+                    }
+                ],
+                "outputs": {
+                    "exampleDrop01": {
+                        "address": "addr_test1qrl07u9ssdtdwtzhrt0zrrr79yejxhfvmsmjt9jxqyaz0ktp6ydulqht6r9z4ld0jms3a3c7gw45u32vhc2ftdp2f6rqvz02jw",
+                        "assets": [
+                            {
+                                "policyId": "ada",
+                                "assetName": "ada",
+                                "quantity": "2000000"
+                            },
+                            {
+                                "policyId": "{get('cache.dependencies.mintingPolicy.scriptHashHex')}",
+                                "assetName": "{get('cache.dependencies.assetName')}",
+                                "quantity": "1"
+                            }
+                        ]
+                    }
+                },
+                "witnesses": {
+                    "nativeScripts": {
+                        "mintingScript": "{get('cache.dependencies.mintingPolicy.scriptHex')}"
+                    }
+                },
+                "auxiliaryData": {
+                    "721": {
+                        "{get('cache.dependencies.mintingPolicy.scriptHashHex')}": {
+                            "{get('cache.dependencies.assetName')}": {
+                                "name": "<releaseName>",
+                                "image": "<mediaURL>",
+                                "music_metadata_version": 3,
+                                "release": {
+                                        "release_type": "<Single/Multiple>",
+                                        "release_title": "<releaseTitle>",
+                                        "distributor": "<distributor>"
+                                          },                
+                                    "files": [
+                                        {
+                                            "name": "Song_name",
+                                            "mediaType": "audio/mpeg",
+                                            "src": "gothere.gcfs.com/music.mp3",
+                                        }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "sign": {
+            "type": "signTxs",
+            "namePattern": "signed-NFTMint",
+            "detailedPermissions": false,
+            "txs": [
+                "{get('cache.build.txHex')}"
+            ]
+        },
+        "submit": {
+            "type": "submitTxs",
+            "namePattern": "submitted-NFTMint",
+            "txs": "{get('cache.sign')}"
+        },
+        "finally": {
+            "type": "script",
+            "run": {
+                "txHash": {
+                    "type": "macro",
+                    "run": "{get('cache.build.txHash')}"
+                },
+                "assetName": {
+                    "type": "macro",
+                    "run": "{get('cache.dependencies.assetName')}"
+                },
+                "policyId": {
+                    "type": "macro",
+                    "run": "{get('cache.dependencies.mintingPolicy.scriptHashHex')}"
+                },
+                "canMintUntilSlotNumber": {
+                    "type": "macro",
+                    "run": "{get('cache.dependencies.deadlineSlotNumber')}"
+                },
+                "mintingScript": {
+                    "type": "macro",
+                    "run": "{get('cache.dependencies.mintingPolicy.scriptHex')}"
+                }
+            }
+        }
+    }
+}
+
+

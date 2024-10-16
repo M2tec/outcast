@@ -1,0 +1,31 @@
+canvas {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.background-image {
+  background-image: linear-gradient(to left top, #30b7ff, #32a3ea, #338ed6, #337bc0, #3268ab, #2360ae, #1657b0, #0e4eb1, #0049c9, #1841de, #3e31f1, #6300ff);
+  height: 100vh;
+}
+
+.linkRow {
+  display: flex;
+  justify-content:left;
+  gap:15px;
+  width: 100%;
+}
+
+#dappLink {
+  height: 28px;
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 22px;
+  background-color: #0f1015;
+  text-decoration: none;
+  font-weight: bold;
+  visibility: hidden;
+}
+
