@@ -25,15 +25,10 @@ canvas {
   position: absolute;
   top: 0;
   left: 0;
-  justify-content: center;
-  align-items: start;
   /* font-size: 96px; */
   color: white;
   opacity: 0.8;
   user-select: none;
-  text-shadow: 1px 1px rgba(0,0,0,0.1);
-  gap: 30px;
-  margin: 30px;
 }
 /* 
 .background-image {
