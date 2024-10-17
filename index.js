@@ -1,8 +1,16 @@
 localStorage.clear()
 
+let coverImageDataBase64 = "";
+let songDataBase64 = "";
 
-let txInfoInput = document.getElementById('txInfo');
+let releaseNameInput = document.getElementById('releaseName');
 
+
+let coverImageInput = document.getElementById("coverImage");
+let songDataInput = document.getElementById("songData");
+let fileList = [];
+
+let distributorInput = document.getElementById('distributor');
 
 let amountInput = document.getElementById('amountInput');
 let walletAddressInput = document.getElementById('walletInput');
@@ -16,8 +24,40 @@ let amountAlert = document.getElementById('amountAlert');
 let txAlertText = document.getElementById("txAlertText");
 let txSuccessAlert = document.getElementById("txSuccessAlert");
 
-let qrCodeImage = document.getElementById("qrcode-image")
-let dAppLink = document.getElementById('dappLink');
+
+function readCoverFile(file) {
+    const reader = new FileReader();
+    reader.addEventListener('load', (event) => {
+      const result = event.target.result;
+      console.log(result)
+      coverImageDataBase64 = gc.utils.Buffer.from(result).toString("hex")
+    });
+  
+    reader.addEventListener('progress', (event) => {
+      if (event.loaded && event.total) {
+        const percent = (event.loaded / event.total) * 100;
+        console.log(`Progress: ${Math.round(percent)}`);
+      }
+    });
+    reader.readAsDataURL(file);
+  }
+  
+  function readSongFile(file) {
+    const reader = new FileReader();
+    reader.addEventListener('load', (event) => {
+      const result = event.target.result;
+      console.log(result)
+      coverSongDataBase64 = gc.utils.Buffer.from(result).toString("hex")
+    });
+  
+    reader.addEventListener('progress', (event) => {
+      if (event.loaded && event.total) {
+        const percent = (event.loaded / event.total) * 100;
+        console.log(`Progress: ${Math.round(percent)}`);
+      }
+    });
+    reader.readAsDataURL(file);
+  }
 
 async function main() {
     const gc = window.gc
@@ -27,7 +67,8 @@ async function main() {
         // Get Data from UI
         let resultObj = undefined;
         let error = "";
-        let txInfo = "";
+        let releaseName = "";
+        let distributor = "";
         error = "";
 
         amount = parseFloat(amountInput.value) * 1000000;
@@ -41,7 +82,32 @@ async function main() {
             actionBtn.classList.remove("disabled");
         }
 
-        txInfo = txInfoInput.value;
+        releaseName = releaseNameInput.value;
+        console.log(releaseName)
+
+        coverFileList = coverImageInput.files; /* now you can work with the file list */
+        console.log(coverFileList.length)
+        if (coverFileList.length > 0) {
+
+            coverFile = coverFileList[0]
+            console.log(coverFileList);
+            console.log(coverFile.name);
+            readCoverFile(coverFile)
+            // console.log(data);
+            // coverImageDataBase64 = gc.utils.Buffer.from(data).toString("hex")
+        }
+
+        songFileList = songDataInput.files; /* now you can work with the file list */
+        console.log(songFileList.length)
+        if (coverFileList.length > 0) {
+            console.log(songFileList);
+            songFile = songFileList[0];
+            console.log(songFile.name);
+            readSongFile(songFile)
+        }
+
+        distributor = distributorInput.value;
+
         walletAddress = walletAddressInput.value;
 
         let network_type = document.querySelector("input[type='radio'][name=network_type]:checked").value;
@@ -66,28 +132,99 @@ async function main() {
             console.error(err);
         }
 
+        // let gcscript =
+        // {
+        //     "title": "Single publis",
+        //     "description": "Publish a song on the Cardano blockchain using the CIP-60 standard",
+        //     "type": "script",
+        //     "run": {
+        //         "importedScript": {
+        //             "type": "importAsScript",
+        //             "args": {
+        //                 "title": "Write song to chain (built by M2tec)",
+        //                 "releaseName": releaseName,
+        //                 "distributor": distributor,
+        //                 "address": walletAddress,
+        //                 "amount": amount.toString(),
+        //                 "url": "https://outcast.m2tec.nl/?txHash={txHash}",
+        //                 "msg": txInfo
+        //             },                    
+        //             "from": [
+        //                 "gcfs://386bec6c6199a40890abd7604b60bf43089d9fb1120a3d42198946b9.Lib@latest://pay.gcscript"
+        //             ]
+        //         }
+        //     }
+        // }
         let gcscript =
         {
-            "title": "Payment",
-            "description": "Review and sign",
+            "title": "Publish single",
+            "description": "Publish a song on the Cardano blockchain using the CIP-60 standard",
             "type": "script",
+            "args": {
+                "title": "Write song to chain (built by M2tec)",
+                "releaseName": releaseName,
+                "coverImageDataHex": coverImageDataBase64,
+                "songDataHex": songDataBase64,
+                "distributor": distributor,
+                "address": walletAddress,
+                "amount": amount.toString(),
+                "url": "https://outcast.m2tec.nl/?txHash={txHash}",
+            },  
             "run": {
-                "importedScript": {
-                    "type": "importAsScript",
-                    "args": {
-                        "title": "M2Tec Payment",
-                        "address": walletAddress,
-                        "amount": amount.toString(),
-                        "url": "https://payments.m2tec.nl/?txHash={txHash}",
-                        "msg": txInfo
-                    },
-                    "from": [
-                        "gcfs://386bec6c6199a40890abd7604b60bf43089d9fb1120a3d42198946b9.Lib@latest://pay.gcscript"
+                "songId": {
+                    "type": "macro",
+                    "run": "{truncate(uuid(),0,12,'')}"
+                  },
+                "fs": {
+                    "type": "macro",
+                    "run": [
+                      {
+                        "{replaceAll('//SONG_ID.cover.jpg','SONG_ID',get('cache.songId'))}": {
+                          "kind": "file",
+                          "fileHex": "{get('args.coverImageDataHex')}"
+                        }
+                      },
+                      {
+                        "{replaceAll('//SONG_ID.song.mp3','SONG_ID',get('cache.songId'))}": {
+                          "kind": "file",
+                          "fileHex": "{get('args.songDataHex')}"
+                        }
+                      }
                     ]
-                }
+                  },
+                  "buildTxs": {
+                    "type": "buildFsTxs",
+                    "description": "Outcast permapublish",
+                    "assetName": "outcast",
+                    "replicas": "1",
+                    "layers": "{get('cache.fs')}"
+                  },
+                  "signTxs": {
+                    "detailedPermissions": false,
+                    "type": "signTxs",
+                    "namePattern": "GCFS_Signed_{key}",
+                    "txs": "{get('cache.buildTxs.txList')}"
+                  },
+                  "submitTxs": {
+                    "type": "submitTxs",
+                    "mode": "parallel",
+                    "namePattern": "GCFS_Submitted{key}",
+                    "txs": "{get('cache.signTxs')}"
+                  },
+                  "finally": {
+                    "type": "script",
+                    "exportAs": "buildFs",
+                    "run": {
+                      "txs": {
+                        "type": "macro",
+                        "run": "{get('cache.submitTxs')}"
+                      }
+                    }
+                  }
             }
         }
 
+        console.log(gcscript)
         gcscript.returnURLPattern = window.location.origin + window.location.pathname;
 
         const actionUrl = await gc.encode.url({
@@ -107,37 +244,37 @@ async function main() {
             "quietZone": 0        
             }`
 
-        const qr = await gc.encode.qr({
-            input: JSON.stringify(gcscript),
-            apiVersion: '2',
-            network: network_type,
-            qrResultType: 'png',
-            styles: none_style,
-            template: 'printable'
-        })
+        // const qr = await gc.encode.qr({
+        //     input: JSON.stringify(gcscript),
+        //     apiVersion: '2',
+        //     network: network_type,
+        //     qrResultType: 'png',
+        //     styles: none_style,
+        //     template: 'printable'
+        // })
 
-        console.log(qr);
-        qrCodeImage.src = qr;
+        // console.log(qr);
+        // qrCodeImage.src = qr;
 
         if (actionUrl) {
 
             actionBtn.setAttribute("href", actionUrl)
             // document.getElementById("qrcode").innerHTML = "";
 
-            dAppLink.style.visibility = "visible";
-            dAppLink.href = actionUrl;
+            // dAppLink.style.visibility = "visible";
+            // dAppLink.href = actionUrl;
 
-            tweetButton = document.getElementById('tweetButton');
-            tweetButton.innerHTML = ''
+            // tweetButton = document.getElementById('tweetButton');
+            // tweetButton.innerHTML = ''
 
-            twttr.widgets.createShareButton(
-                '#GamechangerOk',
-                document.getElementById('tweetButton'),
-                {
-                    size: "large",
-                    text: actionUrl
-                }
-            );
+            // twttr.widgets.createShareButton(
+            //     '#GamechangerOk',
+            //     document.getElementById('tweetButton'),
+            //     {
+            //         size: "large",
+            //         text: actionUrl
+            //     }
+            // );
 
         } else {
             actionBtn.href = '#';
