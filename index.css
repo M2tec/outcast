@@ -68,11 +68,11 @@ canvas {
 }
 
 :root {
-  --pink: #26215a;
-  --violet: #d900ec;
+  --pink: #7934a1;
+  --violet: #eb11ff;
   --font: #cfcfcf;
   --base: #222222;
-  --darkwhite: #cecaca;
+  --darkwhite: #797979;
   --pinkshadow: #ffcbdd;
   --lightbshadow: rgba(0, 0, 0, 0.15);
   --color-bg1: rgb(108, 0, 162);
@@ -249,7 +249,7 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(var(--base) 0%, var(--darkwhite) 100%);
+  background: linear-gradient(var(--font) 0%, var(--darkwhite) 100%);
   box-shadow: 0px 0px 5px var(--pink);
 }
 
