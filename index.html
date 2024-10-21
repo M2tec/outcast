@@ -99,15 +99,24 @@
                 <textarea rows="1" class="form-control" onchange="main()" placeholder="..." id="releaseName"></textarea>
               </div>
 
-              <div class="mb-3">
+              <!-- <div class="mb-3">
                 <label for="formFile" class="form-label">Cover image</label>
-                <input class="form-control" type="file" id="coverImage" onchange="main()">
+                <input class="form-control" type="file" id="coverImage" onchange="coverDataChange()">
               </div>
 
               <div class="mb-3">
                 <label for="formFile" class="form-label">Song data</label>
-                <input class="form-control" type="file" id="songData" onchange="main()">
+                <input class="form-control" type="file" id="songData" onchange="songDataChange()">
+              </div> -->
+              <div class="mt-3 mb-5">
+                <label for="formFile" class="form-label">Cover image IPFS</label>
+                <textarea rows="1" class="form-control" onchange="main()" placeholder="..." id="coverImage"></textarea>
               </div>
+              <div class="mt-3 mb-5">
+                <label for="formFile" class="form-label">Song data IPFS</label>
+                <textarea rows="1" class="form-control" onchange="main()" placeholder="..." id="songData"></textarea>
+              </div>
+
 
 
               <div class="mt-3 mb-5">
